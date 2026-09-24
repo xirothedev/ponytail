@@ -22,7 +22,7 @@ const DESCRIPTIONS = {
   'ponytail-audit': 'Audit the whole repo for over-engineering. A ranked list of what to delete, simplify, or replace with stdlib or native features.',
   'ponytail-debt': 'Harvest every ponytail: shortcut comment into one debt ledger, so deferrals get tracked instead of forgotten. One-shot report.',
   'ponytail-gain': 'Show ponytail measured impact as a scoreboard: less code, less cost, more speed, from the benchmark medians. One-shot display.',
-  'ponytail-help': "Quick reference for ponytail's levels, skills, and commands. One-shot display.",
+  'ponytail-help': "Quick reference for ponytail's modes, skills, and commands. One-shot display.",
 };
 
 const NAMES = Object.keys(DESCRIPTIONS);
