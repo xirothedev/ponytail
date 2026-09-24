@@ -7,7 +7,7 @@ license: MIT
 
 # Ponytail Help
 
-Display this reference card when invoked. One-shot, do NOT change level,
+Display this reference card when invoked. One-shot, do NOT change mode,
 write flag files, or persist anything.
 
 ## Levels
@@ -15,16 +15,16 @@ write flag files, or persist anything.
 | Level | Trigger | What change |
 |-------|---------|-------------|
 | **Lite** | `/ponytail lite` | Build what's asked, name the lazier alternative in one line. |
-| **Full** | `/ponytail full` | The ladder enforced: YAGNI → stdlib → native → one line → minimum. Default. |
+| **Full** | `/ponytail` | The ladder enforced: YAGNI → stdlib → native → one line → minimum. Default. |
 | **Ultra** | `/ponytail ultra` | YAGNI extremist. Deletion before addition. Challenges requirements before building. |
 
-`/ponytail` reports the current level. Level sticks until changed or session end.
+Level sticks until changed or session end.
 
 ## Skills
 
 | Skill | Trigger | What it does |
 |-------|---------|--------------|
-| **ponytail** | `/ponytail` | Lazy level itself. Simplest solution that works. |
+| **ponytail** | `/ponytail` | Lazy mode itself. Simplest solution that works. |
 | **ponytail-review** | `/ponytail-review` | Over-engineering review: `L42: yagni: factory, one product. Inline.` |
 | **ponytail-audit** | `/ponytail-audit` | Whole-repo over-engineering audit: ranked list of what to delete. |
 | **ponytail-debt** | `/ponytail-debt` | Harvest `ponytail:` shortcut comments into a tracked ledger. |
@@ -37,12 +37,12 @@ slash commands).
 
 ## Deactivate
 
-Say "stop ponytail" or "normal mode". Resume anytime with `/ponytail full`.
+Say "stop ponytail" or "normal mode". Resume anytime with `/ponytail`.
 `/ponytail off` also works.
 
-## Configure Default Level
+## Configure Default Mode
 
-Default level = `full`, auto-active every session. Change it:
+Default mode = `full`, auto-active every session. Change it:
 
 **Environment variable** (highest priority):
 ```bash
@@ -55,7 +55,7 @@ export PONYTAIL_DEFAULT_MODE=ultra
 ```
 
 Set `"off"` to disable auto-activation on session start, activate manually
-with `/ponytail full` when wanted.
+with `/ponytail` when wanted.
 
 Resolution: env var > config file > `full`.
 
