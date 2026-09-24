@@ -1,3 +1,0 @@
-# Support OpenCode V1 and V2 from one package
-
-OpenCode V2 cannot run V1 plugin implementations, but existing users still run V1. We therefore ship one package whose default export combines the V2 `Plugin.define({ id, setup })` contract with the V1 `server()` entrypoint supported since OpenCode 1.18.29. Both adapters use the existing user-global level file so the active level does not split by host. The repository configuration keeps the V1 `plugin` key because V2 normalizes it to one `plugins` entry; declaring both keys loads the same plugin twice and fails on its duplicate ID. V1 support is removed in the next Ponytail major release.

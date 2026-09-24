@@ -32,6 +32,12 @@ to load in a given agent.
 | Zed | `AGENTS.md` | Auto-includes `AGENTS.md` from the worktree root as one of its default rule files for the Agent Panel. Instruction-tier. |
 | Generic agents | `AGENTS.md` or `skills/*/SKILL.md` | Copy the compact rule file or load the skill files directly. |
 
+## OpenCode Compatibility
+
+The package uses one default export for both supported generations: OpenCode 2.0.15+ calls `setup()`, while OpenCode 1.18.29+ calls `server()`. Both paths register the same commands and skills and use the same user-global level file.
+
+Use the native config key for an installed package: `plugins` on OpenCode 2 and `plugin` on OpenCode 1. A checkout uses `{ "plugin": ["."] }`; OpenCode 2 normalizes that entry to one `plugins` value. Do not declare both keys for the same checkout because OpenCode creates two definitions with the same plugin ID. The V1 adapter is retained until the next Ponytail major release.
+
 ## Adapter Rule
 
 Keep adapters thin. When a host supports skills or hooks, point it at the
