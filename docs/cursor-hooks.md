@@ -8,8 +8,8 @@ install script and a small output branch in `hooks/ponytail-runtime.js`.
 |------|------|
 | `hooks/cursor-hooks.json` | Template: `sessionStart` and `beforeSubmitPrompt` entries with a `PONYTAIL_DIR` placeholder. |
 | `scripts/cursor-hooks.js` | `install` / `uninstall`, merges into `~/.cursor/hooks.json` (or `.cursor/hooks.json` with `--project`). |
-| `hooks/ponytail-activate.js` | `sessionStart`: injects the default-mode ruleset. |
-| `hooks/ponytail-mode-tracker.js` | `beforeSubmitPrompt`: tracks `/ponytail` commands, injects the new mode's ruleset. |
+| `hooks/ponytail-activate.js` | `sessionStart`: injects the default-level ruleset. |
+| `hooks/ponytail-mode-tracker.js` | `beforeSubmitPrompt`: tracks `/ponytail` commands, injects the new level's ruleset. |
 | `hooks/ponytail-runtime.js` | Detects Cursor (`CURSOR_VERSION`), keeps state in `~/.cursor/.ponytail-active`, emits Cursor-shaped JSON. |
 
 ## Install and uninstall
@@ -80,24 +80,24 @@ Execution environment (client, 3.20.17):
 ## Behavior
 
 - New conversation: `sessionStart` writes `~/.cursor/.ponytail-active` with the
-  default mode (`PONYTAIL_DEFAULT_MODE`, then `config.json`, then `full`) and
-  injects `PONYTAIL MODE ACTIVE — mode: <mode>` followed by the ruleset filtered
-  to that mode. Default `off`: no flag, no output.
+  default level (`PONYTAIL_DEFAULT_MODE`, then `config.json`, then `full`) and
+  injects `PONYTAIL MODE ACTIVE — level: <level>` followed by the ruleset filtered
+  to that level. Default `off`: no flag, no output.
 - `/ponytail lite|full|ultra` sent as a plain message: the flag changes and the
-  turn receives `PONYTAIL MODE CHANGED — mode: <mode>` plus that mode's ruleset
+  turn receives `PONYTAIL MODE CHANGED — level: <level>` plus that level's ruleset
   (about 5,300 characters, under the inline cap). Cursor has no `/ponytail`
   command to load the skill body, so the hook carries it. `@ponytail` and
   `$ponytail` are parsed too, but `@` opens Cursor's context picker. If the
   ponytail skills are also installed under `~/.cursor/skills`, Cursor treats
   `/ponytail lite` as a manual skill attachment and inlines the full, unfiltered
   skill body into that message as well; the hook still receives the literal
-  `/ponytail lite` and remains the thing that tracks the mode.
+  `/ponytail lite` and remains the thing that tracks the level.
 - `/ponytail off`, `stop ponytail`, `normal mode`: the flag is removed and the
   turn receives `PONYTAIL MODE OFF`. The ruleset injected at `sessionStart` stays
   in the conversation's system context; the notice is what tells the model to
   stop applying it, the same as in Claude Code.
-- `/ponytail`: reports `PONYTAIL MODE ACTIVE — mode: <mode>` without changing
-  anything. `/ponytail default <mode>` persists the default to `config.json`.
+- `/ponytail`: reports `PONYTAIL MODE ACTIVE — level: <level>` without changing
+  anything. `/ponytail default <level>` persists the default to `config.json`.
 - Any other prompt: no output.
 
 ### Coexistence with `.cursor/rules/ponytail.mdc`
@@ -113,7 +113,7 @@ workspace root, from `CURSOR_PROJECT_DIR` or the working directory):
 - `/ponytail ...`, `stop ponytail` and `normal mode` answer with the same notice
   and change nothing.
 
-Delete the rule to let the hooks manage the mode. A project that keeps the rule
+Delete the rule to let the hooks manage the level. A project that keeps the rule
 for teammates without hooks stays on the rule's fixed behavior for everyone.
 
 ## Limitations
@@ -124,7 +124,7 @@ for teammates without hooks stays on the rule's fixed behavior for everyone.
   effect in Cursor.
 - Cloud agents do not run `sessionStart` (documented), so there is no startup
   injection there. Project-level `beforeSubmitPrompt` still runs, so `/ponytail
-  <mode>` sets the mode for the rest of that conversation.
+  <level>` sets the level for the rest of that conversation.
 - `sessionStart` is fire-and-forget. A prompt sent within the first fraction of a
   second of a new chat can leave before the context is attached.
 - On Windows every hook run costs about a second, mostly PowerShell startup
@@ -134,7 +134,7 @@ for teammates without hooks stays on the rule's fixed behavior for everyone.
 - Mode state is one flag per user, shared by every open Cursor conversation, the
   same as the Claude Code adapter.
 - The `beforeSubmitPrompt` injection field is not on the docs page. If a future
-  Cursor build drops it, mode switches would still update the flag but nothing
+  Cursor build drops it, level switches would still update the flag but nothing
   would reach the model; only the startup injection would remain.
 
 ## Verification record
@@ -169,9 +169,9 @@ the outcome in the table.
 1. Install with `node scripts/cursor-hooks.js install`, make sure the workspace
    has no `.cursor/rules/ponytail.mdc`, open a new Agent chat.
 2. Ask: "Quote the first line of any ponytail context you were given." Expected:
-   `PONYTAIL MODE ACTIVE — mode: full` (or the configured default).
+   `PONYTAIL MODE ACTIVE — level: full` (or the configured default).
 3. Send `/ponytail lite`, then ask: "Quote the first line of the most recent
-   ponytail context." Expected: `PONYTAIL MODE CHANGED — mode: lite`. Repeat
+   ponytail context." Expected: `PONYTAIL MODE CHANGED — level: lite`. Repeat
    for `ultra`.
 4. Send `/ponytail off`, then ask the same question. Expected:
    `PONYTAIL MODE OFF`.

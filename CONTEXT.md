@@ -4,14 +4,14 @@ Ponytail guides coding agents toward the smallest correct solution without compr
 
 ## Language
 
-**Ponytail mode**:
+**Ponytail level**:
 The user-selected intensity of Ponytail guidance. Its runtime values are `off`, `lite`, `full`, and `ultra`.
-_Avoid_: Level, review
+_Avoid_: Mode, review
 
-**Active mode**:
-The Ponytail mode currently selected for one user across every project and session.
-_Avoid_: Default mode, session mode
+**Active level**:
+The Ponytail level currently selected for one user across every project and session.
+_Avoid_: Default level, session level
 
-**Default mode**:
-The fallback Ponytail mode used when no active mode is available.
-_Avoid_: Initial mode
+**Default level**:
+The fallback Ponytail level used when no active level is available.
+_Avoid_: Initial level

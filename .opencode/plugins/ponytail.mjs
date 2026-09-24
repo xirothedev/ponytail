@@ -15,7 +15,7 @@ const { parseFrontmatterFile } = require('./ponytail-frontmatter.cjs');
 const commandDir = path.join(__dirname, '..', 'commands');
 const skillsDir = path.resolve(__dirname, '../../skills');
 const statePath = getOpenCodeStatePath();
-const acceptedModes = RUNTIME_MODES.join(', ');
+const acceptedLevels = RUNTIME_MODES.join(', ');
 
 function readMode() {
   try {
@@ -47,15 +47,15 @@ function skills() {
     .filter((skill) => skill.description);
 }
 
-function applyMode(args) {
-  const current = readMode();
-  if (!args) return { text: `Current Ponytail mode: ${current}. Do not change it.` };
-  const mode = normalizeMode(args);
-  if (!mode) {
-    return { text: `Ponytail mode remains ${current}. Use one of: ${acceptedModes}.` };
+function applyLevel(args) {
+  const currentLevel = readMode();
+  if (!args) return { text: `Current Ponytail level: ${currentLevel}. Do not change it.` };
+  const level = normalizeMode(args);
+  if (!level) {
+    return { text: `Ponytail level remains ${currentLevel}. Use one of: ${acceptedLevels}.` };
   }
-  writeMode(mode);
-  return { mode, text: `Ponytail mode switched to ${mode}. Confirm it in one short line.` };
+  writeMode(level);
+  return { level, text: `Ponytail level switched to ${level}. Confirm it in one short line.` };
 }
 
 function promptText(template, args) {
@@ -75,7 +75,7 @@ async function setup(ctx) {
         execute: async ({ sessionID, prompt, delivery }) => {
           const args = String(prompt.text || '').trim();
           let text = promptText(command.template, args);
-          if (command.name === 'ponytail') text = applyMode(args).text;
+          if (command.name === 'ponytail') text = applyLevel(args).text;
           await ctx.session.prompt({ ...prompt, sessionID, text, delivery });
         },
       });
@@ -135,9 +135,9 @@ async function server({ client } = {}) {
 
     'command.execute.before': async (input, output) => {
       if (input?.command !== 'ponytail') return;
-      const result = applyMode(String(input.arguments || '').trim());
+      const result = applyLevel(String(input.arguments || '').trim());
       output.parts = [{ type: 'text', text: result.text }];
-      if (result.mode) log(`ponytail ${result.mode}`);
+      if (result.level) log(`ponytail ${result.level}`);
     },
   };
 }

@@ -179,7 +179,7 @@ Para OpenCode 1.18.29 o más nuevo, usa la clave V1:
 
 Para usar un checkout, reemplaza el nombre del paquete con `"."` en la clave de tu versión de OpenCode. OpenCode carga el paquete del checkout mediante `package.json`; el plugin encuentra `hooks/` y `skills/` desde la ubicación del archivo.
 
-Un paquete compatible con ambas versiones inyecta el modo activo en cada solicitud del bucle del agente y registra los comandos `/ponytail` (ver [Comandos](#comandos)). Las dos versiones comparten el mismo archivo de modo global del usuario. OpenCode también carga el `AGENTS.md` de este checkout, así que las reglas aplican aun sin el plugin. El plugin agrega los modos `lite/full/ultra/off`.
+Un paquete compatible con ambas versiones inyecta el nivel activo en cada solicitud del bucle del agente y registra los comandos `/ponytail` (ver [Comandos](#comandos)). Las dos versiones comparten el mismo archivo de nivel global del usuario. OpenCode también carga el `AGENTS.md` de este checkout, así que las reglas aplican aun sin el plugin. El plugin agrega los niveles `lite/full/ultra/off`.
 
 El path `.` se resuelve contra el `opencode.json` de tu proyecto; para compartir un checkout entre proyectos, usa el path absoluto del directorio del checkout.
 
@@ -245,13 +245,13 @@ git clone https://github.com/DietrichGebert/ponytail
 node ponytail/scripts/cursor-hooks.js install
 ```
 
-Fusiona dos hooks nativos en `~/.cursor/hooks.json` (con `--project` escribe `<proyecto>/.cursor/hooks.json`) y conserva los hooks que ya tengas ahí. Las entradas ejecutan `node` desde ese checkout, así que déjalo donde está o vuelve a correr la instalación si lo mueves. Cursor recarga el archivo al guardarlo; abre un chat nuevo y el ruleset de tu modo predeterminado llega por `sessionStart`. Envía `/ponytail lite`, `/ponytail full`, `/ponytail ultra` o `/ponytail off` como mensaje normal para cambiar el modo durante el resto de la conversación; `/ponytail` lo reporta. El `subagentStart` de Cursor no puede inyectar contexto, así que los subagentes corren sin el ruleset, y los agentes en la nube nunca disparan `sessionStart`. La regla permanente (`.cursor/rules/ponytail.mdc`) y los hooks son alternativas: mientras la regla esté en el workspace los hooks no inyectan nada y los comandos de modo responden con un aviso; borra la regla para que los hooks manejen el modo. Contrato, verificación y límites: [docs/cursor-hooks.md](docs/cursor-hooks.md). Desinstalar: `node ponytail/scripts/cursor-hooks.js uninstall`.
+Fusiona dos hooks nativos en `~/.cursor/hooks.json` (con `--project` escribe `<proyecto>/.cursor/hooks.json`) y conserva los hooks que ya tengas ahí. Las entradas ejecutan `node` desde ese checkout, así que déjalo donde está o vuelve a correr la instalación si lo mueves. Cursor recarga el archivo al guardarlo; abre un chat nuevo y el ruleset de tu nivel por defecto llega por `sessionStart`. Envía `/ponytail lite`, `/ponytail full`, `/ponytail ultra` o `/ponytail off` como mensaje normal para cambiar el nivel durante el resto de la conversación; `/ponytail` lo reporta. El `subagentStart` de Cursor no puede inyectar contexto, así que los subagentes corren sin el ruleset, y los agentes en la nube nunca disparan `sessionStart`. La regla permanente (`.cursor/rules/ponytail.mdc`) y los hooks son alternativas: mientras la regla esté en el workspace los hooks no inyectan nada y los comandos de modo responden con un aviso; borra la regla para que los hooks manejen el nivel. Contrato, verificación y límites: [docs/cursor-hooks.md](docs/cursor-hooks.md). Desinstalar: `node ponytail/scripts/cursor-hooks.js uninstall`.
 
 Eso fue todo. Él estaría orgulloso. No lo va a decir.
 
-Activo en cada sesión, con un puñado de comandos (ver [Comandos](#comandos)). `/ponytail ultra` existe para cuando el codebase te hizo algo personal. El texto de inicio y de cambio de modo muestra el modo activo.
+Activo en cada sesión, con un puñado de comandos (ver [Comandos](#comandos)). `/ponytail ultra` existe para cuando el codebase te hizo algo personal. El texto de inicio y de cambio de modo muestra el nivel activo.
 
-Configura el modo para cada nueva sesión con la variable de entorno `PONYTAIL_DEFAULT_MODE` (`lite`/`full`/`ultra`/`off`), o con un campo `defaultMode` en `~/.config/ponytail/config.json` (`%APPDATA%\ponytail\config.json` en Windows). El modo predeterminado es `full`.
+Configura el nivel para cada nueva sesión con la variable de entorno `PONYTAIL_DEFAULT_MODE` (`lite`/`full`/`ultra`/`off`), o con un campo `defaultMode` en `~/.config/ponytail/config.json` (`%APPDATA%\ponytail\config.json` en Windows). El nivel predeterminado es `full`.
 
 Cursor (solo la regla, alternativa a los [hooks](#cursor)), Windsurf, Cline, GitHub Copilot (editor), Aider, Kiro: copia el archivo de reglas correspondiente de este repo ([`.cursor/rules/`](.cursor/rules/), [`.windsurf/rules/`](.windsurf/rules/), [`.clinerules/`](.clinerules/), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), [`AGENTS.md`](AGENTS.md), [`.kiro/steering/`](.kiro/steering/)).
 
@@ -277,19 +277,19 @@ Qué archivos corresponden a qué agente: [Portabilidad de agentes](docs/agent-p
 | Cursor hooks | `node scripts/cursor-hooks.js uninstall` (añade `--project` para una instalación local) |
 | Reglas de Cursor / Windsurf / Cline / Qoder | Borra el archivo de reglas copiado |
 
-Estos comandos quitan los archivos del plugin. Pueden quedar datos externos: el flag de modo (`~/.claude/.ponytail-active`, `~/.config/opencode/.ponytail-active` o `~/.cursor/.ponytail-active`), `~/.config/ponytail/config.json`, las entradas de Ponytail en `~/.cursor/hooks.json` y un `statusLine` de Ponytail en `~/.claude/settings.json`. Ejecuta `node scripts/uninstall.js` antes de quitar el plugin para borrar esos datos.
+Estos comandos quitan los archivos del plugin. Pueden quedar datos externos: el flag de nivel (`~/.claude/.ponytail-active`, `~/.config/opencode/.ponytail-active` o `~/.cursor/.ponytail-active`), `~/.config/ponytail/config.json`, las entradas de Ponytail en `~/.cursor/hooks.json` y un `statusLine` de Ponytail en `~/.claude/settings.json`. Ejecuta `node scripts/uninstall.js` antes de quitar el plugin para borrar esos datos.
 
 ## Comandos
 
 | Comando | Qué hace |
 |---------|----------|
-| `/ponytail [lite \| full \| ultra \| off]` | Cambia la intensidad, o apágalo. Sin argumento, reporta el modo actual. |
+| `/ponytail [lite \| full \| ultra \| off]` | Cambia la intensidad, o apágalo. Sin argumento, reporta el nivel actual. |
 | `/ponytail-review` | Revisa el diff actual en busca de sobre-ingeniería y devuelve una lista de qué eliminar. |
 | `/ponytail-audit` | Audita el repo completo en busca de sobre-ingeniería, no solo el diff. |
 | `/ponytail-debt` | Recolecta los atajos marcados con `ponytail:` que dejaste pendientes en un registro, para que "después" no se convierta en "nunca". |
 | `/ponytail-help` | Referencia rápida de los comandos anteriores. |
 
-Los comandos requieren un host compatible con skills (Claude Code, Codex, Devin CLI, OpenCode 2 o 1.18.29+, Gemini, pi, Swival). En Codex son skills; se invocan con `@` (`@ponytail-review`). Cursor con los [hooks](#cursor) solo tiene el cambio de modo con `/ponytail`, escrito como mensaje normal. Los adaptadores de solo instrucciones (la regla de Cursor, Windsurf, Cline, Copilot, Kiro, Antigravity) cargan el ruleset permanente sin los comandos.
+Los comandos requieren un host compatible con skills (Claude Code, Codex, Devin CLI, OpenCode 2 o 1.18.29+, Gemini, pi, Swival). En Codex son skills; se invocan con `@` (`@ponytail-review`). Cursor con los [hooks](#cursor) solo tiene el cambio de nivel con `/ponytail`, escrito como mensaje normal. Los adaptadores de solo instrucciones (la regla de Cursor, Windsurf, Cline, Copilot, Kiro, Antigravity) cargan el ruleset permanente sin los comandos.
 
 ## Desarrollo
 
@@ -310,7 +310,7 @@ El benchmark de correctness lanza Python para las verificaciones de email y CSV;
 Sí, y deberías. Caveman achica lo que el agente dice; ponytail achica lo que construye. Mitades distintas, sin solapamiento: caveman deja el código intacto byte por byte, ponytail no se mete con la prosa. Charla concisa sobre código mínimo.
 
 **¿Necesita un archivo de configuración?**
-No. Un opcional `~/.config/ponytail/config.json` o la variable `PONYTAIL_DEFAULT_MODE` pueden fijar el modo predeterminado, pero nada es obligatorio.
+No. Un opcional `~/.config/ponytail/config.json` o la variable `PONYTAIL_DEFAULT_MODE` pueden fijar el nivel predeterminado, pero nada es obligatorio.
 
 **¿Y si realmente necesito la clase de caché de 120 líneas?**
 No la necesitas. Insiste de todas formas y él la va a construir. Despacio. Correctamente. Mirándote.

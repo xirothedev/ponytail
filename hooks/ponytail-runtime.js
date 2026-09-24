@@ -74,7 +74,7 @@ function cursorRuleNotice(rule) {
     'already carries the ponytail ruleset, so the ponytail hooks injected nothing further. ' +
     'Mode switching (/ponytail lite|full|ultra|off, "stop ponytail") is unavailable while ' +
     'that rule exists. When the user tries to switch or turn off ponytail, tell them to ' +
-    'delete that rule so hooks.json can manage the mode.';
+    'delete that rule so hooks.json can manage the level.';
 }
 
 function writeHookOutput(event, mode, context = '') {

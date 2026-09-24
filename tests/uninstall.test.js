@@ -70,7 +70,7 @@ let result = runUninstall(env);
 assert.equal(result.status, 0, result.stderr);
 assert.equal(fs.existsSync(flagPath), false, 'mode flag must be removed');
 assert.equal(fs.existsSync(configPath), false, 'config file must be removed');
-assert.equal(fs.existsSync(openCodeFlagPath), false, 'OpenCode mode flag must be removed');
+assert.equal(fs.existsSync(openCodeFlagPath), false, 'OpenCode level flag must be removed');
 assert.equal(fs.existsSync(cursorFlagPath), false, 'Cursor mode flag must be removed');
 assert.deepEqual(
   JSON.parse(fs.readFileSync(cursorHooksPath, 'utf8')),

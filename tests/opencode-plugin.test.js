@@ -107,12 +107,12 @@ test('V1 registers commands and skills', async () => {
   const config = {};
   await hooks.config(config);
 
-  assert.equal(config.command.ponytail.description, 'Switch ponytail mode (lite/full/ultra/off)');
+  assert.equal(config.command.ponytail.description, 'Switch ponytail intensity level (lite/full/ultra/off)');
   assert.equal(config.skills.paths.length, 1);
   assert.match(config.skills.paths[0], /skills$/);
 });
 
-test('V1 injects the default mode and preserves Qwen system merging', async () => {
+test('V1 injects the default level and preserves Qwen system merging', async () => {
   resetMode();
   const hooks = await plugin.server({});
   const output = { system: ['You are a helpful assistant.'] };
@@ -120,10 +120,10 @@ test('V1 injects the default mode and preserves Qwen system merging', async () =
 
   assert.equal(output.system.length, 1);
   assert.match(output.system[0], /You are a helpful assistant/);
-  assert.match(output.system[0], /PONYTAIL MODE ACTIVE — mode: full/);
+  assert.match(output.system[0], /PONYTAIL MODE ACTIVE — level: full/);
 });
 
-test('V1 mode commands persist, bare reports, and invalid input explains', async () => {
+test('V1 level commands persist, bare reports, and invalid input explains', async () => {
   const hooks = await plugin.server({});
 
   const switched = { parts: [] };
@@ -183,7 +183,7 @@ test('V2 injects only into the agent-loop context', async () => {
   await hooks.get('context')(event);
   assert.equal(event.system.length, 2);
   assert.deepEqual(event.system[0], { type: 'text', text: 'base system' });
-  assert.match(event.system[1].text, /PONYTAIL MODE ACTIVE — mode: full/);
+  assert.match(event.system[1].text, /PONYTAIL MODE ACTIVE — level: full/);
 
   resetMode('off');
   const off = contextEvent();
@@ -191,7 +191,7 @@ test('V2 injects only into the agent-loop context', async () => {
   assert.deepEqual(off.system, []);
 });
 
-test('V2 mode commands share state and report invalid input', async () => {
+test('V2 level commands share state and report invalid input', async () => {
   resetMode();
   const { commands, prompts } = await setupV2();
   const execute = (text, delivery = 'steer') =>
@@ -229,7 +229,7 @@ test('V2 command templates preserve arguments and delivery', async () => {
   assert.match(prompts[0].text, /Arguments: staged files/);
 });
 
-test('V1 and V2 share the active mode file', async () => {
+test('V1 and V2 share the active level file', async () => {
   resetMode();
   const legacy = await plugin.server({});
   await legacy['command.execute.before'](v1Prompt('ponytail', 'ultra'), { parts: [] });
@@ -237,7 +237,7 @@ test('V1 and V2 share the active mode file', async () => {
   const { commands, hooks } = await setupV2();
   const fromV2 = contextEvent();
   await hooks.get('context')(fromV2);
-  assert.match(fromV2.system[0].text, /mode: ultra/);
+  assert.match(fromV2.system[0].text, /level: ultra/);
 
   await commands.get('ponytail').execute({
     sessionID: 'session',
@@ -246,7 +246,7 @@ test('V1 and V2 share the active mode file', async () => {
   });
   const fromV1 = { system: [] };
   await legacy['experimental.chat.system.transform']({ model: {} }, fromV1);
-  assert.match(fromV1.system[0], /mode: lite/);
+  assert.match(fromV1.system[0], /level: lite/);
 });
 
 test('frontmatter parser reads folded skill descriptions', () => {
