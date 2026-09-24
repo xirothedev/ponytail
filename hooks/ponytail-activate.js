@@ -36,7 +36,7 @@ if (mode === 'off') {
 }
 
 // Cursor with the always-on rule in the workspace: the rule already carries the
-// ruleset and would contradict any other level, so leave the flag alone and
+// ruleset and would contradict any other mode, so leave the flag alone and
 // hand the model a one-line notice instead of a second copy (#817).
 if (isCursor) {
   const rule = cursorRulePath();
@@ -57,7 +57,7 @@ try {
   // Silent fail -- flag is best-effort, don't block the hook
 }
 
-// 2. Emit the ponytail ruleset, filtered to the active intensity level.
+// 2. Emit the ponytail ruleset, filtered to the active intensity mode.
 let output = getPonytailInstructions(mode);
 
 // 3. Detect missing statusline config — nudge Claude to help set it up

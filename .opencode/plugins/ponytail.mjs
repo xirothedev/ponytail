@@ -1,39 +1,26 @@
-// ponytail — OpenCode plugin.
-//
-// Injects the ponytail ruleset into every chat's system prompt at the active
-// intensity, persists /ponytail mode switches, and registers slash commands so
-// they work when the package is installed from npm. Reuses the shared
-// instruction builder so Claude Code, Codex, pi, and OpenCode all read one
-// source of truth.
-//
-// OpenCode loads this as a server plugin — add it to your opencode.json:
-//   { "plugin": ["@dietrichgebert/ponytail"] }
+// ponytail — OpenCode V1 and V2 plugin.
 
+import { Plugin } from '@opencode/plugin';
 import { createRequire } from 'module';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// The shared instruction builder is CommonJS; bridge to it from this ES module.
 const require = createRequire(import.meta.url);
 const { getPonytailInstructions } = require('../../hooks/ponytail-instructions');
-const { getDefaultMode, normalizePersistedMode } = require('../../hooks/ponytail-config');
-const { parseCommandFile } = require('./ponytail-frontmatter.cjs');
+const { getDefaultMode, getOpenCodeStatePath, normalizeMode, RUNTIME_MODES } = require('../../hooks/ponytail-config');
+const { parseFrontmatterFile } = require('./ponytail-frontmatter.cjs');
 
-// OpenCode has no flag-file convention of its own; keep mode beside its config.
-const statePath = path.join(
-  process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'),
-  'opencode',
-  '.ponytail-active',
-);
+const commandDir = path.join(__dirname, '..', 'commands');
+const skillsDir = path.resolve(__dirname, '../../skills');
+const statePath = getOpenCodeStatePath();
+const acceptedModes = RUNTIME_MODES.join(', ');
 
 function readMode() {
   try {
-    return normalizePersistedMode(fs.readFileSync(statePath, 'utf8').trim()) || getDefaultMode();
-  } catch (e) {
+    return normalizeMode(fs.readFileSync(statePath, 'utf8').trim()) || getDefaultMode();
+  } catch {
     return getDefaultMode();
   }
 }
@@ -43,57 +30,119 @@ function writeMode(mode) {
   fs.writeFileSync(statePath, mode);
 }
 
-export default async ({ client } = {}) => {
-  const log = (level, message) => {
-    try { client && client.app && client.app.log({ body: { service: 'ponytail', level, message } }); } catch (e) {}
+function commands() {
+  return fs.readdirSync(commandDir)
+    .filter((file) => file.endsWith('.md'))
+    .map((file) => ({ ...parseFrontmatterFile(path.join(commandDir, file)), name: path.basename(file, '.md') }))
+    .filter((command) => command.description);
+}
+
+function skills() {
+  return fs.readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => {
+      const location = path.join(skillsDir, entry.name, 'SKILL.md');
+      return { id: entry.name, location, ...parseFrontmatterFile(location) };
+    })
+    .filter((skill) => skill.description);
+}
+
+function applyMode(args) {
+  const current = readMode();
+  if (!args) return { text: `Current Ponytail mode: ${current}. Do not change it.` };
+  const mode = normalizeMode(args);
+  if (!mode) {
+    return { text: `Ponytail mode remains ${current}. Use one of: ${acceptedModes}.` };
+  }
+  writeMode(mode);
+  return { mode, text: `Ponytail mode switched to ${mode}. Confirm it in one short line.` };
+}
+
+function promptText(template, args) {
+  const text = template.replaceAll('$ARGUMENTS', args);
+  return args && !template.includes('$ARGUMENTS') ? `${text}\n\nArguments: ${args}` : text;
+}
+
+async function setup(ctx) {
+  const commandDefinitions = commands();
+  const skillDefinitions = skills();
+
+  await ctx.command.transform((editor) => {
+    for (const command of commandDefinitions) {
+      editor.add({
+        name: command.name,
+        description: command.description,
+        execute: async ({ sessionID, prompt, delivery }) => {
+          const args = String(prompt.text || '').trim();
+          let text = promptText(command.template, args);
+          if (command.name === 'ponytail') text = applyMode(args).text;
+          await ctx.session.prompt({ ...prompt, sessionID, text, delivery });
+        },
+      });
+    }
+  });
+
+  await ctx.skill.transform((editor) => {
+    for (const skill of skillDefinitions) {
+      editor.add({
+        id: skill.id,
+        name: skill.name || skill.id,
+        description: skill.description,
+        path: skill.location,
+        content: skill.template,
+      });
+    }
+  });
+
+  await ctx.session.hook('context', (event) => {
+    const mode = readMode();
+    if (mode === 'off') return;
+    event.system.push({ type: 'text', text: getPonytailInstructions(mode) });
+  });
+}
+
+async function server({ client } = {}) {
+  const log = (message) => {
+    try {
+      client?.app?.log({ body: { service: 'ponytail', level: 'info', message } });
+    } catch {}
   };
 
-  const ponytailSkillsDir = path.resolve(__dirname, '../../skills');
-
   return {
-    // Register slash commands + skills directory.
     config: async (config) => {
-      if (!config.command) config.command = {};
-      const commandDir = path.join(__dirname, '..', 'command');
-      try {
-        for (const file of fs.readdirSync(commandDir).filter((f) => f.endsWith('.md'))) {
-          const name = path.basename(file, '.md');
-          const parsed = parseCommandFile(path.join(commandDir, file));
-          if (parsed) config.command[name] = parsed;
-        }
-      } catch (e) {}
-
-      config.skills = config.skills || {};
-      config.skills.paths = config.skills.paths || [];
-      if (!config.skills.paths.includes(ponytailSkillsDir)) {
-        config.skills.paths.push(ponytailSkillsDir);
+      config.command ||= {};
+      for (const command of commands()) {
+        config.command[command.name] = {
+          description: command.description,
+          template: command.template,
+        };
       }
+      config.skills ||= {};
+      config.skills.paths ||= [];
+      if (!config.skills.paths.includes(skillsDir)) config.skills.paths.push(skillsDir);
     },
 
-    // Append the ruleset to the system prompt every turn.
     'experimental.chat.system.transform': async (_input, output) => {
       const mode = readMode();
       if (mode === 'off') return;
       const instructions = getPonytailInstructions(mode);
       if (output.system.length > 0) {
-        output.system[output.system.length - 1] += '\n\n' + instructions;
+        output.system[output.system.length - 1] += `\n\n${instructions}`;
       } else {
         output.system.push(instructions);
       }
     },
 
-    // Persist `/ponytail <level>` so the next turn's injection follows it.
-    // ponytail: mode applies from the next message, not the current one — the
-    // transform reads the flag the command writes. Good enough; switch to a
-    // synchronous store if same-turn switching ever matters.
-    'command.execute.before': async (input) => {
-      if (!input || input.command !== 'ponytail') return;
-      // `off` is persisted like any mode; the transform reads it and stays silent.
-      const args = String(input.arguments || '').trim();
-      const mode = args ? normalizePersistedMode(args) : getDefaultMode();
-      if (!mode) return;
-      writeMode(mode);
-      log('info', 'ponytail ' + mode);
+    'command.execute.before': async (input, output) => {
+      if (input?.command !== 'ponytail') return;
+      const result = applyMode(String(input.arguments || '').trim());
+      output.parts = [{ type: 'text', text: result.text }];
+      if (result.mode) log(`ponytail ${result.mode}`);
     },
   };
+}
+
+export default {
+  ...Plugin.define({ id: 'ponytail', setup }),
+  server,
 };

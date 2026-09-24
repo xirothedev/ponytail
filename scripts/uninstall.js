@@ -8,7 +8,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { getConfigPath, getClaudeDir } = require('../hooks/ponytail-config');
+const { getConfigPath, getClaudeDir, getOpenCodeStatePath } = require('../hooks/ponytail-config');
 const cursorHooks = require('./cursor-hooks');
 
 const STATUSLINE_SCRIPT = 'ponytail-statusline';
@@ -24,6 +24,7 @@ function removeIfExists(filePath, label) {
 
 removeIfExists(path.join(getClaudeDir(), '.ponytail-active'), 'mode flag');
 removeIfExists(path.join(os.homedir(), '.cursor', '.ponytail-active'), 'Cursor mode flag');
+removeIfExists(getOpenCodeStatePath(), 'OpenCode mode flag');
 removeIfExists(getConfigPath(), 'config file');
 
 // Cursor hooks (#817): drop only ponytail's entries from ~/.cursor/hooks.json,

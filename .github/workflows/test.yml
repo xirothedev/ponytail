@@ -6,6 +6,10 @@ on:
     tags: ['v*']
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,6 +19,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Install root dependencies
+        run: npm ci
 
       - uses: actions/setup-python@v5
         with:

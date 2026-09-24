@@ -45,7 +45,10 @@ def _config_dir() -> Path:
     if os.environ.get("XDG_CONFIG_HOME"):
         return Path(os.environ["XDG_CONFIG_HOME"]) / "ponytail"
     if os.name == "nt":
-        return Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "ponytail"
+        return (
+            Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+            / "ponytail"
+        )
     return Path.home() / ".config" / "ponytail"
 
 
@@ -89,7 +92,7 @@ def _filter_skill_body_for_mode(body: str, mode: str) -> str:
 
 def _fallback_instructions(mode: str) -> str:
     return (
-        f"PONYTAIL MODE ACTIVE — level: {mode}\n\n"
+        f"PONYTAIL MODE ACTIVE — mode: {mode}\n\n"
         "You are a lazy senior developer. Lazy means efficient, not careless. "
         "The best code is the code never written.\n\n"
         "Before any code, stop at the first rung that holds: YAGNI, stdlib, "
@@ -110,14 +113,14 @@ def build_injected_context(mode: str | None = None) -> str:
     if configured == "review":
         try:
             body = REVIEW_SKILL.read_text(encoding="utf-8")
-            return f"PONYTAIL MODE ACTIVE — level: review\n\n{_strip_frontmatter(body)}"
+            return f"PONYTAIL MODE ACTIVE — mode: review\n\n{_strip_frontmatter(body)}"
         except OSError:
-            return "PONYTAIL MODE ACTIVE — level: review. Review diffs for unnecessary complexity."
+            return "PONYTAIL MODE ACTIVE — mode: review. Review diffs for unnecessary complexity."
 
     effective = _normalize_runtime_mode(configured) or DEFAULT_MODE
     try:
         body = PONYTAIL_SKILL.read_text(encoding="utf-8")
-        return f"PONYTAIL MODE ACTIVE — level: {effective}\n\n{_filter_skill_body_for_mode(body, effective)}"
+        return f"PONYTAIL MODE ACTIVE — mode: {effective}\n\n{_filter_skill_body_for_mode(body, effective)}"
     except OSError:
         return _fallback_instructions(effective)
 
@@ -150,7 +153,9 @@ def _slash_access_denied(event: Any, gateway: Any, command: str) -> bool:
         return True
 
 
-def rewrite_gateway_command(event: Any = None, gateway: Any = None, **_: Any) -> dict[str, str] | None:
+def rewrite_gateway_command(
+    event: Any = None, gateway: Any = None, **_: Any
+) -> dict[str, str] | None:
     """Rewrite authorized gateway /ponytail-* commands into normal agent prompts."""
     text = str(getattr(event, "text", "") or "").strip()
     if not text.startswith("/"):

@@ -80,7 +80,7 @@ function finish() {
         writeHookOutput(
           'UserPromptSubmit',
           mode,
-          'PONYTAIL MODE ACTIVE — level: ' + mode,
+          'PONYTAIL MODE ACTIVE — mode: ' + mode,
         );
       } else if (mode && mode !== 'off') {
         setMode(mode);
@@ -90,9 +90,9 @@ function finish() {
         // below (one JSON on stdout) instead of emitting two separate writes.
         if (!isQoder) {
           // Cursor has no /ponytail command that would load the skill body
-          // for the new level, so the tracker delivers that level's ruleset
+          // for the new mode, so the tracker delivers that mode's ruleset
           // along with the confirmation (#817).
-          const header = 'PONYTAIL MODE CHANGED — level: ' + mode;
+          const header = 'PONYTAIL MODE CHANGED — mode: ' + mode;
           writeHookOutput(
             'UserPromptSubmit',
             mode,
@@ -131,7 +131,7 @@ function finish() {
         // ponytail: one JSON per invocation — mode-switch confirmation is
         // folded into the ruleset header so Qoder gets both in one write.
         const header = modeSwitched
-          ? 'PONYTAIL MODE CHANGED — level: ' + currentMode + '\n\n'
+          ? 'PONYTAIL MODE CHANGED — mode: ' + currentMode + '\n\n'
           : '';
         writeHookOutput('UserPromptSubmit', currentMode, header + getPonytailInstructions(currentMode));
       }

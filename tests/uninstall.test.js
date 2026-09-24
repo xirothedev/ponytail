@@ -32,6 +32,11 @@ fs.mkdirSync(configDir, { recursive: true });
 const configPath = path.join(configDir, 'config.json');
 fs.writeFileSync(configPath, JSON.stringify({ defaultMode: 'ultra' }));
 
+const openCodeDir = path.join(temp, 'config-home', 'opencode');
+fs.mkdirSync(openCodeDir, { recursive: true });
+const openCodeFlagPath = path.join(openCodeDir, '.ponytail-active');
+fs.writeFileSync(openCodeFlagPath, 'full');
+
 const settingsPath = path.join(claudeDir, 'settings.json');
 fs.writeFileSync(settingsPath, JSON.stringify({
   statusLine: { type: 'command', command: 'bash /some/path/ponytail-statusline.sh' },
@@ -65,6 +70,7 @@ let result = runUninstall(env);
 assert.equal(result.status, 0, result.stderr);
 assert.equal(fs.existsSync(flagPath), false, 'mode flag must be removed');
 assert.equal(fs.existsSync(configPath), false, 'config file must be removed');
+assert.equal(fs.existsSync(openCodeFlagPath), false, 'OpenCode mode flag must be removed');
 assert.equal(fs.existsSync(cursorFlagPath), false, 'Cursor mode flag must be removed');
 assert.deepEqual(
   JSON.parse(fs.readFileSync(cursorHooksPath, 'utf8')),

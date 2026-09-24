@@ -11,15 +11,15 @@ description: >
 Display this reference card when invoked. One-shot, do NOT change mode,
 write flag files, or persist anything.
 
-## Levels
+## Modes
 
-| Level | Trigger | What change |
+| Mode | Trigger | What change |
 |-------|---------|-------------|
 | **Lite** | `/ponytail lite` | Build what's asked, name the lazier alternative in one line. |
-| **Full** | `/ponytail` | The ladder enforced: YAGNI → stdlib → native → one line → minimum. Default. |
+| **Full** | `/ponytail full` | The ladder enforced: YAGNI → stdlib → native → one line → minimum. Default. |
 | **Ultra** | `/ponytail ultra` | YAGNI extremist. Deletion before addition. Challenges requirements before building. |
 
-Level sticks until changed or session end.
+`/ponytail` reports the current mode. Mode sticks until changed or session end.
 
 ## Skills
 

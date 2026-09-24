@@ -111,7 +111,7 @@ test('isCursor is off outside a Cursor hook process', () => {
   assert.equal(isCursor, false);
 });
 
-test('sessionStart injects the default-level ruleset as additional_context and keeps state under ~/.cursor', () => {
+test('sessionStart injects the default-mode ruleset as additional_context and keeps state under ~/.cursor', () => {
   const c = cursorEnv('start', { PONYTAIL_DEFAULT_MODE: 'ultra' });
   const input = JSON.stringify({
     hook_event_name: 'sessionStart', conversation_id: 'conv-1', session_id: 'conv-1',
@@ -120,8 +120,8 @@ test('sessionStart injects the default-level ruleset as additional_context and k
   });
   const output = parse(run('ponytail-activate.js', c.env, input));
   assert.deepEqual(Object.keys(output), ['additional_context']);
-  assert.match(output.additional_context, /^PONYTAIL MODE ACTIVE — level: ultra/);
-  assert.match(output.additional_context, /YAGNI extremist/, 'ultra row must survive the level filter');
+  assert.match(output.additional_context, /^PONYTAIL MODE ACTIVE — mode: ultra/);
+  assert.match(output.additional_context, /YAGNI extremist/, 'ultra row must survive the mode filter');
   assert.doesNotMatch(output.additional_context, /Build what's asked/, 'lite row must be filtered out');
   assert.doesNotMatch(output.additional_context, /STATUSLINE SETUP NEEDED/, 'Cursor has no Claude statusline to nudge about');
   assert.equal(fs.readFileSync(c.flag, 'utf8'), 'ultra');
@@ -142,11 +142,11 @@ test('Cursor running a Claude-format plugin (CLAUDE_PLUGIN_ROOT set) still gets 
   c.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   c.env.CURSOR_PLUGIN_ROOT = pluginRoot;
   const output = parse(run('ponytail-activate.js', c.env));
-  assert.match(output.additional_context, /^PONYTAIL MODE ACTIVE — level: full/);
+  assert.match(output.additional_context, /^PONYTAIL MODE ACTIVE — mode: full/);
   assert.equal(fs.readFileSync(c.flag, 'utf8'), 'full');
 });
 
-test('beforeSubmitPrompt tracks /ponytail commands and delivers the new level ruleset', () => {
+test('beforeSubmitPrompt tracks /ponytail commands and delivers the new mode ruleset', () => {
   const c = cursorEnv('switch', { PONYTAIL_DEFAULT_MODE: 'full' });
   writeFlag(c, 'full');
 
@@ -156,17 +156,17 @@ test('beforeSubmitPrompt tracks /ponytail commands and delivers the new level ru
   })));
   assert.equal(sw.continue, true, 'must never block the prompt');
   assert.equal(sw.user_message, undefined, 'Cursor shows user_message only for blocked prompts');
-  assert.match(sw.additional_context, /^PONYTAIL MODE CHANGED — level: lite/);
-  assert.match(sw.additional_context, /Build what's asked/, 'Cursor has no /ponytail command, so the level ruleset rides along');
+  assert.match(sw.additional_context, /^PONYTAIL MODE CHANGED — mode: lite/);
+  assert.match(sw.additional_context, /Build what's asked/, 'Cursor has no /ponytail command, so the mode ruleset rides along');
   assert.doesNotMatch(sw.additional_context, /YAGNI extremist/);
   assert.equal(fs.readFileSync(c.flag, 'utf8'), 'lite');
 
-  // Bare /ponytail reports the live level without resetting it.
+  // Bare /ponytail reports the live mode without resetting it.
   const report = parse(run('ponytail-mode-tracker.js', c.env, JSON.stringify({ prompt: '/ponytail' })));
-  assert.deepEqual(report, { continue: true, additional_context: 'PONYTAIL MODE ACTIVE — level: lite' });
+  assert.deepEqual(report, { continue: true, additional_context: 'PONYTAIL MODE ACTIVE — mode: lite' });
   assert.equal(fs.readFileSync(c.flag, 'utf8'), 'lite');
 
-  // /ponytail default persists the default without touching the session level.
+  // /ponytail default persists the default without touching the session mode.
   const def = parse(run('ponytail-mode-tracker.js', c.env, JSON.stringify({ prompt: '/ponytail default ultra' })));
   assert.equal(def.continue, true);
   assert.match(def.additional_context, /PONYTAIL DEFAULT SET — new sessions start in ultra/);

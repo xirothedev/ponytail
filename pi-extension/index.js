@@ -49,7 +49,7 @@ export function parsePonytailCommand(text, defaultMode = DEFAULT_MODE) {
   if (primary === "status") return { type: "status" };
 
   if (primary === "default") {
-    // ponytail: a default must be a runtime level; review is session-only (#377).
+    // ponytail: a default must be a runtime mode; review is session-only (#377).
     const mode = normalizeMode(secondary);
     return mode ? { type: "set-default", mode } : { type: "invalid", reason: "invalid-default-mode" };
   }
@@ -81,8 +81,8 @@ export default function ponytailExtension(pi) {
       c.ui.setStatus("ponytail", "");
       return;
     }
-    const levelIcons = { lite: "🌿", full: "⚡", ultra: "🔥" };
-    const icon = levelIcons[currentMode] || "";
+    const modeIcons = { lite: "🌿", full: "⚡", ultra: "🔥" };
+    const icon = modeIcons[currentMode] || "";
     const label = currentMode.toUpperCase();
     const indicator = isActive ? theme.fg("accent", "●") : theme.fg("dim", "○");
     c.ui.setStatus("ponytail", indicator + " 🐴 " + theme.fg("muted", "ponytail: ") + theme.fg("text", icon + " " + label));

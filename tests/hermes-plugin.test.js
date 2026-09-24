@@ -106,7 +106,7 @@ print(json.dumps({'ctx': ctx}))
 `, { XDG_CONFIG_HOME: tmp });
   const { ctx } = JSON.parse(output);
 
-  assert.match(ctx, /PONYTAIL MODE ACTIVE — level: ultra/);
+  assert.match(ctx, /PONYTAIL MODE ACTIVE — mode: ultra/);
   assert.match(ctx, /The best\s+code is the code never written/);
   assert.match(ctx, /ultra/i);
   assert.doesNotMatch(ctx, /^---/);
@@ -142,7 +142,7 @@ print(json.dumps({
 }))
 `, { XDG_CONFIG_HOME: tmp, PONYTAIL_DEFAULT_MODE: 'ultra' });
   const data = JSON.parse(output);
-  assert.match(data.default, /level: ultra/);
+  assert.match(data.default, /mode: ultra/);
   assert.equal(data.off, '');
   assert.match(data.status_before, /Ponytail mode: ultra/);
   assert.match(data.invalid, /Usage:/);
@@ -159,7 +159,7 @@ ctx = mod.build_injected_context('review')
 print(json.dumps({'ctx': ctx}))
 `);
   const { ctx } = JSON.parse(output);
-  assert.match(ctx, /PONYTAIL MODE ACTIVE — level: review/);
+  assert.match(ctx, /PONYTAIL MODE ACTIVE — mode: review/);
   assert.match(ctx, /Review diffs for unnecessary complexity/);
   assert.match(ctx, /net: -<N> lines possible/);
   assert.doesNotMatch(ctx, /^---/);
@@ -187,7 +187,7 @@ print(json.dumps({'message': message, 'context': injected['context']}))
 `);
   const data = JSON.parse(output);
   assert.match(data.message, /ultra/);
-  assert.match(data.context, /PONYTAIL MODE ACTIVE — level: ultra/);
+  assert.match(data.context, /PONYTAIL MODE ACTIVE — mode: ultra/);
 });
 
 test('Hermes gateway rewrite respects slash access denial', () => {
